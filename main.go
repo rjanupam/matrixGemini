@@ -58,6 +58,7 @@ func main() {
 			}
 
 			adapter := matrix.NewMatrixAdapter(matrixClient, brain, &cfg.Bot, cfg.Matrix.AutoJoinInvites)
+
 			log.Println("🚀 Starting Matrix bot...")
 			if err := adapter.Start(); err != nil {
 				log.Printf("Matrix Bot failed: %v", err)
@@ -65,9 +66,10 @@ func main() {
 		}()
 	}
 
-	var discordBot *discord.DiscordAdapter
 	if cfg.Discord.Enabled && cfg.Discord.Token != "" {
-		discordBot, err = discord.NewDiscordAdapter(cfg.Discord.Token, brain)
+		log.Println("Discord enabled. Connecting...")
+
+		discordBot, err := discord.NewDiscordAdapter(cfg.Discord.Token, brain)
 		if err != nil {
 			log.Fatalf("Failed to create Discord client: %v", err)
 		}

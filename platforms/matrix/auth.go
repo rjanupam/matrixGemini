@@ -3,11 +3,13 @@ package matrix
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"syscall"
 
 	"golang.org/x/crypto/argon2"
@@ -36,20 +38,18 @@ type CredentialStore struct {
 }
 
 func deriveKey(password string, salt []byte) [32]byte {
-	derived := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	passwordBytes := []byte(password)
+
+	derived := argon2.IDKey([]byte(passwordBytes), salt, 1, 64*1024, 4, 32)
 
 	var key [32]byte
 	copy(key[:], derived)
-	return key
-}
 
-func getEncryptionKey(password string) [32]byte {
-	key := [32]byte{}
-	copy(key[:], password)
-	// todo: use argon2
-	for i := len(password); i < 32; i++ {
-		key[i] = 0xFF // Padding
-	}
+	subtle.ConstantTimeCopy(1, passwordBytes, make([]byte, len(passwordBytes)))
+	subtle.ConstantTimeCopy(1, derived, make([]byte, len(derived)))
+
+	runtime.GC()
+
 	return key
 }
 

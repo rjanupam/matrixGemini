@@ -28,6 +28,10 @@ func NewDiscordAdapter(token string, coreBot *core.Bot) (*DiscordAdapter, error)
 		return nil, err
 	}
 
+	dg.StateEnabled = false
+
+	dg.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentsDirectMessages
+
 	return &DiscordAdapter{
 		Session: dg,
 		Core:    coreBot,
